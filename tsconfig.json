@@ -1,11 +1,13 @@
 {
   "compilerOptions": {
     "target": "es5",
+    "types": ["react","react-dom"],
     "lib": [
       "dom",
       "dom.iterable",
       "esnext"
     ],
+    "jsxImportSource": "react",
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
