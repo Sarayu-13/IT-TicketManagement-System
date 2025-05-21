@@ -2,9 +2,19 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { Ticket } from "../types/types";
 import { TicketList } from "./TicketList";
-import { Box, Typography, Paper, Tabs, Tab } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Paper,
+  Tabs,
+  Tab,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+} from "@mui/material";
 
-// Mock API calls
 const mockGetAllTickets = () => {
   const tickets: Ticket[] = [
     {
@@ -61,7 +71,13 @@ export const AdminDashboard = () => {
       ? tickets
       : tabValue === 1
       ? tickets.filter((t) => t.status !== "resolved")
-      : tickets.filter((t) => t.status === "resolved");
+      : tabValue === 2
+      ? tickets.filter((t) => t.status === "resolved")
+      : tickets.filter((t) => t.status === "resolved" && t.resolutionComment);
+
+  const resolvedTickets = tickets.filter(
+    (t) => t.status === "resolved" && t.resolutionComment
+  );
 
   return (
     <Box sx={{ p: 3 }}>
@@ -73,14 +89,66 @@ export const AdminDashboard = () => {
         <Tabs
           value={tabValue}
           onChange={(e, newValue) => setTabValue(newValue)}
+          variant="scrollable"
+          scrollButtons="auto"
         >
           <Tab label="All Tickets" />
           <Tab label="Open Tickets" />
           <Tab label="Resolved Tickets" />
+          <Tab label="Past Resolutions" />
         </Tabs>
       </Paper>
 
-      <TicketList tickets={filteredTickets} />
+      <Typography variant="h6" gutterBottom>
+        {tabValue === 0 && "All Tickets"}
+        {tabValue === 1 && "Open Tickets"}
+        {tabValue === 2 && "Resolved Tickets"}
+      </Typography>
+
+      {tabValue < 3 ? (
+        <TicketList tickets={filteredTickets} />
+      ) : (
+        <>
+          {resolvedTickets.length > 0 ? (
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>
+                    <strong>Title</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Description</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Assigned To</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Created</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Resolution</strong>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {resolvedTickets.map((ticket) => (
+                  <TableRow key={ticket.id}>
+                    <TableCell>{ticket.title}</TableCell>
+                    <TableCell>{ticket.description}</TableCell>
+                    <TableCell>{ticket.assignedTo}</TableCell>
+                    <TableCell>{ticket.createdAt.toLocaleString()}</TableCell>
+                    <TableCell>{ticket.resolutionComment}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <Typography variant="body2" sx={{ p: 2 }}>
+              No resolved issues with resolution comments found.
+            </Typography>
+          )}
+        </>
+      )}
     </Box>
   );
 };
